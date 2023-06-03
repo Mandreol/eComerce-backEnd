@@ -1,6 +1,5 @@
 const request = require("supertest");
 const app = require("../app");
-const Category = require("../models/Category");
 
 let token;
 let categoryId;
@@ -12,11 +11,14 @@ beforeAll(async () => {
 	};
 	const res = await request(app).post("/users/login").send(credentials);
 	token = res.body.token;
+	console.log(res.status);
+	console.log(res.body);
+	console.log(token);
 });
 
 test("POST /categories should create one category", async () => {
 	const category = {
-		name: "electronica",
+		name: "categoriaTest",
 	};
 	const res = await request(app)
 		.post("/categories")

@@ -12,7 +12,7 @@ const productImgRouter = express.Router();
 productImgRouter
 	.route("/")
 	.get(verifyJWT, getAll)
-	.delete(verifyJWT, remove)
 	.post(verifyJWT, upload.single("image"), create);
+productImgRouter.route("/:id").delete(verifyJWT, remove);
 
 module.exports = productImgRouter;
