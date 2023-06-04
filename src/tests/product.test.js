@@ -1,5 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
+const Category = require("../models/Category");
+require("../models");
 
 let token;
 let productId;
@@ -14,10 +16,11 @@ beforeAll(async () => {
 });
 
 test("POST/poducts should create a new product", async () => {
+	const category = await Category.create({ name: "test category" });
 	const product = {
 		title: "producto 3",
 		description: "esta es la descripción del producto 3",
-		categoryId: 3,
+		categoryId: category.id,
 		brand: "esta es la marca del producto 3",
 		price: 2000,
 	};
@@ -26,6 +29,7 @@ test("POST/poducts should create a new product", async () => {
 		.send(product)
 		.set("Authorization", `Bearer ${token}`);
 	productId = res.body.id;
+	await category.destroy();
 	expect(res.status).toBe(201);
 	expect(res.body.id).toBeDefined();
 });

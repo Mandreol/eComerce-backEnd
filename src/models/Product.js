@@ -10,7 +10,7 @@ const Product = sequelize.define("product", {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
-	//categoryId
+
 	brand: {
 		type: DataTypes.STRING,
 		allowNull: false,
@@ -19,6 +19,7 @@ const Product = sequelize.define("product", {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
+	//categoryId
 });
 
 module.exports = Product;

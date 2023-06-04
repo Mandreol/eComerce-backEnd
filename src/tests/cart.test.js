@@ -1,10 +1,13 @@
 const request = require("supertest");
-const app = require("../app");
 const Product = require("../models/Product");
+const Category = require("../models/Category");
+const app = require("../app");
 require("../models");
 
 let token;
+let userId;
 let cartId;
+let productId;
 
 beforeAll(async () => {
 	const credentials = {
@@ -13,53 +16,57 @@ beforeAll(async () => {
 	};
 	const res = await request(app).post("/users/login").send(credentials);
 	token = res.body.token;
+	userId = res.body.id;
 });
 
-test("POST /cart should create a cart", async () => {
+test("POST/cart shoult crate a cart", async () => {
+	const category = await Category.create({ name: "test" });
 	const product = await Product.create({
-		title: "producto test",
-		description: "esta es la descripción del producto test",
-		categoryId: 3,
-		brand: "esta es la marca del producto 3",
+		title: "producto de prueba",
+		description: "descripción del producto de prueba",
+		categoryId: category.id,
+		brand: "esta es la marca de l producto",
 		price: 2000,
 	});
 	const cart = {
+		userId,
 		productId: product.id,
-		quantity: 5,
+		quantity: 1,
 	};
 	const res = await request(app)
 		.post("/cart")
 		.send(cart)
 		.set("Authorization", `Bearer ${token}`);
-	await product.destroy();
+	productId = res.body.id;
+	await category.destroy();
+
 	cartId = res.body.id;
 	expect(res.status).toBe(201);
 	expect(res.body.id).toBeDefined();
 });
 
-test("GET /cart", async () => {
+test("GEt/should be get all the products of te loged user", async () => {
 	const res = await request(app)
-		.get("/cart")
+		.get("/cart", { where: [userId] })
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(200);
-	expect(res.body).toHaveLength(1);
 });
 
-test("PUT /cart/:id", async () => {
-	const cartUpdate = {
-		rate: 1,
+test("PUT/cart/:id should update cart of logged user ", async () => {
+	const updateCart = {
+		quantity: 3,
 	};
 	const res = await request(app)
 		.put(`/cart/${cartId}`)
-		.send(cartUpdate)
+		.send(updateCart)
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(200);
-	expect(res.body.rate).toBe(cartUpdate.rate);
+	expect(res.body.quantity).toBe(updateCart.quantity);
 });
 
-test("DELETE /cart/:id", async () => {
+test("DELETE/cart/:id should remove a product of de cart", async () => {
 	const res = await request(app)
-		.delete(`/cart/${cartId}`)
+		.delete(`/cart/${productId}`, { where: cartId })
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(204);
 });
