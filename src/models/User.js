@@ -29,7 +29,6 @@ const User = sequelize.define("user", {
 User.beforeCreate(async (user) => {
 	const hashedPassword = await bcrypt.hash(user.password, 10);
 	user.password = hashedPassword;
-	console.log(hashedPassword);
 });
 
 User.prototype.toJSON = function () {

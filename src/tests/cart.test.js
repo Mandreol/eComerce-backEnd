@@ -1,8 +1,10 @@
 const request = require("supertest");
 const app = require("../app");
+const Product = require("../models/Product");
+require("../models");
 
 let token;
-let categoryId;
+let cartId;
 
 beforeAll(async () => {
 	const credentials = {
@@ -13,42 +15,51 @@ beforeAll(async () => {
 	token = res.body.token;
 });
 
-test("POST /categories should create one category", async () => {
-	const category = {
-		name: "categoriaTest",
+test("POST /cart should create a cart", async () => {
+	const product = await Product.create({
+		title: "producto test",
+		description: "esta es la descripción del producto test",
+		categoryId: 3,
+		brand: "esta es la marca del producto 3",
+		price: 2000,
+	});
+	const cart = {
+		productId: product.id,
+		quantity: 5,
 	};
 	const res = await request(app)
-		.post("/categories")
-		.send(category)
+		.post("/cart")
+		.send(cart)
 		.set("Authorization", `Bearer ${token}`);
-	categoryId = res.body.id;
+	await product.destroy();
+	cartId = res.body.id;
 	expect(res.status).toBe(201);
 	expect(res.body.id).toBeDefined();
 });
 
-test("GET /categories", async () => {
+test("GET /cart", async () => {
 	const res = await request(app)
-		.get("/categories")
+		.get("/cart")
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(200);
 	expect(res.body).toHaveLength(1);
 });
 
-test("PUT /categories/:id", async () => {
-	const categoryUpdated = {
-		name: "Sports updated",
+test("PUT /cart/:id", async () => {
+	const cartUpdate = {
+		rate: 1,
 	};
 	const res = await request(app)
-		.put(`/categories/${categoryId}`)
-		.send(categoryUpdated)
+		.put(`/cart/${cartId}`)
+		.send(cartUpdate)
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(200);
-	expect(res.body.firstName).toBe(categoryUpdated.firstName);
+	expect(res.body.rate).toBe(cartUpdate.rate);
 });
 
-test("DELETE /categories/:id", async () => {
+test("DELETE /cart/:id", async () => {
 	const res = await request(app)
-		.delete(`/categories/${categoryId}`)
+		.delete(`/cart/${cartId}`)
 		.set("Authorization", `Bearer ${token}`);
 	expect(res.status).toBe(204);
 });
